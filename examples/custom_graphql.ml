@@ -5,7 +5,7 @@ module Car = struct
 
   type t = {
     license : string;
-    year : int32;
+    year : int;
     make_and_model : string * string;
     color : color;
     owner : string;
@@ -15,7 +15,7 @@ module Car = struct
   let merge = Irmin.Merge.(option (idempotent t))
 end
 
-module Store = Irmin_unix.Git.Mem.KV (Car)
+module Store = Irmin_unix.Git.FS.KV (Car)
 
 module Custom_types = struct
   module Defaults = Irmin_graphql.Server.Default_types (Store)
@@ -40,8 +40,8 @@ module Custom_types = struct
             [
               field "license" ~typ:(non_null string) ~args:[]
                 ~resolve:(fun _ car -> car.Car.license);
-              field "year" ~typ:(non_null string) ~args:[]
-                ~resolve:(fun _ car -> car.Car.license);
+              field "year" ~typ:(non_null int) ~args:[]
+                ~resolve:(fun _ car -> car.Car.year);
               field "make" ~typ:(non_null string) ~args:[]
                 ~resolve:(fun _ car -> fst car.Car.make_and_model);
               field "model" ~typ:(non_null string) ~args:[]
@@ -69,7 +69,7 @@ module Custom_types = struct
           ~coerce:(fun license year make model color owner ->
             {
               Car.license;
-              year = Int32.of_int year;
+              year = year;
               make_and_model = (make, model);
               color;
               owner;
@@ -96,5 +96,22 @@ let main () =
   let on_exn exn = Printf.printf "on_exn: %s" (Printexc.to_string exn) in
   Printf.printf "Visit GraphiQL @ http://%s:%d/graphql\n%!" src port;
   Cohttp_lwt_unix.Server.create ~on_exn ~ctx ~mode:(`TCP (`Port port)) server
+
+let reporter ppf =
+  let report src level ~over k msgf =
+    let k _ =
+      over () ;
+      k () in
+    let with_metadata header _tags k ppf fmt =
+      Format.kfprintf k ppf
+        ("%a[%a]: " ^^ fmt ^^ "\n%!")
+        Logs_fmt.pp_header (level, header)
+        Fmt.(styled `Magenta string)
+        (Logs.Src.name src) in
+    msgf @@ fun ?header ?tags fmt -> with_metadata header tags k ppf fmt in
+  { Logs.report }
+
+let () = Logs.set_reporter (reporter Fmt.stderr)
+let () = Logs.set_level ~all:true (Some Logs.Debug)
 
 let () = Lwt_main.run (main ())

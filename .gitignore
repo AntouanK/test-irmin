@@ -9,3 +9,8 @@ vendors/
 .#*
 .*.swp
 **/.DS_Store
+
+
+node_modules/
+front-end/public/build
+
