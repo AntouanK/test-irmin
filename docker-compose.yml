@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    ports:
+      - 80:80
+      - 443:443
+
+  irmin:
+    build:
+      context: .
+      dockerfile: Dockerfile.irmin
+
+  svelte:
+    build:
+      context: .
+      dockerfile: Dockerfile.svelte
