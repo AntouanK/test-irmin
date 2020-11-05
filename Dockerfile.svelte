@@ -12,8 +12,6 @@ COPY ./front-end/scripts ./scripts
 COPY ./front-end/public ./public
 COPY ./front-end/src ./src
 
-RUN node --version
-
 ENV HOST=0.0.0.0
 
 CMD npm run dev

@@ -79,6 +79,9 @@ USER opam
 COPY ./docker-install.sh .
 RUN ./docker-install.sh
 
+RUN mkdir -p /tmp/irmin
+RUN chown opam:opam /tmp/irmin
+
 COPY ./docker-run.sh .
 CMD ./docker-run.sh
 

@@ -61,7 +61,7 @@
     const query = `
 	  mutation {
 		set(
-			key: "cars/tromso", 
+			key: "cars/example", 
 			value: 
 				{ owner: "${owner}"
 				, color: "${color}"
@@ -125,7 +125,10 @@
           <button class="button" on:click={refreshCars}>get cars</button>
         </div>
         <existing-cars class="content">
-          {JSON.stringify(existingCars, null, 2)}
+          <pre
+            class="pre">
+            {JSON.stringify(existingCars, null, 2)}
+          </pre>
         </existing-cars>
       </div>
       <div class="column">
