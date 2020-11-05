@@ -1,5 +1,9 @@
 FROM ocurrent/opam
 
+USER root
+RUN mkdir -p /home/opam/irmin
+RUN chown -R opam /home/opam
+
 WORKDIR /home/opam
 USER opam
 
@@ -16,8 +20,6 @@ RUN opam repository set-url default https://opam.ocaml.org
 RUN opam update;
 RUN opam install dune;
 
-RUN mkdir -p /home/opam/irmin
-RUN chown opam /home/opam/irmin
 WORKDIR /home/opam/irmin
 
 COPY ./src ./src
@@ -65,6 +67,11 @@ RUN opam pin add -yn ppx_irmin.dev './' && \
 
 RUN opam install .
 
+COPY ./.ocamlformat .
+COPY ./.ocamlformat-ignore .
+COPY ./dune-project .
+
+# chown again all the copied files
 USER root
 RUN chown -R opam /home/opam
 USER opam
